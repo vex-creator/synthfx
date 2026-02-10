@@ -153,6 +153,7 @@ const elements = {
     // Buttons
     playBtn: document.getElementById('playBtn'),
     exportBtn: document.getElementById('exportBtn'),
+    previewOscBtn: document.getElementById('previewOscBtn'),
     
     // Canvases
     envelopeCanvas: document.getElementById('envelopeCanvas'),
@@ -167,8 +168,16 @@ function init() {
             elements.waveButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentParams.waveType = btn.dataset.wave;
+            
+            // Update preview if playing
+            if (audioEngine.isPreviewPlaying()) {
+                audioEngine.updatePreview(currentParams.waveType, currentParams.freqStart);
+            }
         });
     });
+
+    // Oscillator preview button
+    elements.previewOscBtn.addEventListener('click', toggleOscillatorPreview);
 
     // Filter type buttons
     elements.filterButtons.forEach(btn => {
@@ -236,10 +245,32 @@ function setupSlider(id, valueId, formatter) {
         if (['attack', 'decay', 'sustain', 'release', 'duration'].includes(id)) {
             drawEnvelope();
         }
+        
+        // Update preview pitch if playing
+        if (id === 'freqStart' && audioEngine.isPreviewPlaying()) {
+            audioEngine.updatePreview(currentParams.waveType, value);
+        }
     };
 
     slider.addEventListener('input', update);
     update(); // Initial value
+}
+
+// Toggle oscillator preview (raw waveform)
+function toggleOscillatorPreview() {
+    if (audioEngine.isPreviewPlaying()) {
+        audioEngine.stopPreview();
+        elements.previewOscBtn.classList.remove('active');
+        elements.previewOscBtn.textContent = '🔊 Preview Raw';
+    } else {
+        audioEngine.startPreview(
+            currentParams.waveType,
+            currentParams.freqStart,
+            currentParams.volume * 0.5  // Lower volume for preview
+        );
+        elements.previewOscBtn.classList.add('active');
+        elements.previewOscBtn.textContent = '⏹ Stop';
+    }
 }
 
 // Apply a preset to all controls

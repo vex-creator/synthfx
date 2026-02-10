@@ -7,6 +7,8 @@ class AudioEngine {
     constructor() {
         this.audioContext = null;
         this.lastRenderedBuffer = null;
+        this.previewOscillator = null;
+        this.previewGain = null;
     }
 
     /**
@@ -335,6 +337,77 @@ class AudioEngine {
      */
     getLastRenderedBuffer() {
         return this.lastRenderedBuffer;
+    }
+
+    /**
+     * Start continuous oscillator preview (raw waveform, no envelope)
+     */
+    startPreview(waveType, frequency, volume = 0.3) {
+        this.stopPreview(); // Stop any existing preview
+        
+        const ctx = this.init();
+        
+        // Create oscillator
+        this.previewOscillator = ctx.createOscillator();
+        this.previewOscillator.type = waveType;
+        this.previewOscillator.frequency.value = frequency;
+        
+        // Create gain for volume control and smooth start
+        this.previewGain = ctx.createGain();
+        this.previewGain.gain.setValueAtTime(0, ctx.currentTime);
+        this.previewGain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.05);
+        
+        // Connect
+        this.previewOscillator.connect(this.previewGain);
+        this.previewGain.connect(ctx.destination);
+        
+        // Start
+        this.previewOscillator.start();
+    }
+
+    /**
+     * Update preview oscillator parameters in real-time
+     */
+    updatePreview(waveType, frequency) {
+        if (this.previewOscillator) {
+            this.previewOscillator.type = waveType;
+            this.previewOscillator.frequency.value = frequency;
+        }
+    }
+
+    /**
+     * Stop oscillator preview
+     */
+    stopPreview() {
+        if (this.previewOscillator) {
+            const ctx = this.audioContext;
+            if (ctx && this.previewGain) {
+                // Smooth fade out to avoid click
+                this.previewGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
+                setTimeout(() => {
+                    if (this.previewOscillator) {
+                        this.previewOscillator.stop();
+                        this.previewOscillator.disconnect();
+                        this.previewOscillator = null;
+                    }
+                    if (this.previewGain) {
+                        this.previewGain.disconnect();
+                        this.previewGain = null;
+                    }
+                }, 60);
+            } else {
+                this.previewOscillator.stop();
+                this.previewOscillator.disconnect();
+                this.previewOscillator = null;
+            }
+        }
+    }
+
+    /**
+     * Check if preview is currently playing
+     */
+    isPreviewPlaying() {
+        return this.previewOscillator !== null;
     }
 }
 

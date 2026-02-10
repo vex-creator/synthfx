@@ -161,6 +161,30 @@ input[type="range"]::-moz-range-thumb {
     color: var(--text-primary);
 }
 
+/* Preview button */
+.preview-btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    background: var(--bg-control);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 10px;
+}
+
+.preview-btn:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.preview-btn.active {
+    background: var(--accent-cyan);
+    color: var(--bg-dark);
+    border-color: var(--accent-cyan);
+}
+
 .wave-btn.active, .filter-btn.active {
     background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 170, 0.2));
     border-color: var(--accent-cyan);
