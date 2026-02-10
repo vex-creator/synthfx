@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthFX — Procedural Audio Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SynthFX</h1>
+            <p class="subtitle">Procedural Game Audio</p>
+        </header>
+
+        <main>
+            <!-- Oscillator Section -->
+            <section class="panel">
+                <h2>Oscillator</h2>
+                <div class="control-group">
+                    <label>Wave Type</label>
+                    <div class="wave-buttons">
+                        <button class="wave-btn active" data-wave="sine">Sine</button>
+                        <button class="wave-btn" data-wave="square">Square</button>
+                        <button class="wave-btn" data-wave="sawtooth">Saw</button>
+                        <button class="wave-btn" data-wave="triangle">Triangle</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span>Start Frequency</span>
+                        <span class="value" id="freqStartValue">440 Hz</span>
+                    </label>
+                    <input type="range" id="freqStart" min="20" max="2000" value="440" step="1">
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span>End Frequency</span>
+                        <span class="value" id="freqEndValue">110 Hz</span>
+                    </label>
+                    <input type="range" id="freqEnd" min="20" max="2000" value="110" step="1">
+                </div>
+            </section>
+
+            <!-- Envelope Section -->
+            <section class="panel">
+                <h2>Envelope (ADSR)</h2>
+                <div class="envelope-visual">
+                    <canvas id="envelopeCanvas" width="300" height="100"></canvas>
+                </div>
+                <div class="control-row">
+                    <div class="control-group small">
+                        <label>
+                            <span>Attack</span>
+                            <span class="value" id="attackValue">0.01s</span>
+                        </label>
+                        <input type="range" id="attack" min="0.001" max="1" value="0.01" step="0.001">
+                    </div>
+                    <div class="control-group small">
+                        <label>
+                            <span>Decay</span>
+                            <span class="value" id="decayValue">0.1s</span>
+                        </label>
+                        <input type="range" id="decay" min="0.001" max="1" value="0.1" step="0.001">
+                    </div>
+                    <div class="control-group small">
+                        <label>
+                            <span>Sustain</span>
+                            <span class="value" id="sustainValue">0.3</span>
+                        </label>
+                        <input type="range" id="sustain" min="0" max="1" value="0.3" step="0.01">
+                    </div>
+                    <div class="control-group small">
+                        <label>
+                            <span>Release</span>
+                            <span class="value" id="releaseValue">0.2s</span>
+                        </label>
+                        <input type="range" id="release" min="0.001" max="2" value="0.2" step="0.001">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filter Section -->
+            <section class="panel">
+                <h2>Filter</h2>
+                <div class="control-group">
+                    <label>
+                        <span>Filter Type</span>
+                    </label>
+                    <div class="wave-buttons">
+                        <button class="filter-btn active" data-filter="lowpass">Low-pass</button>
+                        <button class="filter-btn" data-filter="highpass">High-pass</button>
+                        <button class="filter-btn" data-filter="bandpass">Band-pass</button>
+                        <button class="filter-btn" data-filter="none">Off</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span>Cutoff</span>
+                        <span class="value" id="cutoffValue">2000 Hz</span>
+                    </label>
+                    <input type="range" id="cutoff" min="20" max="20000" value="2000" step="1">
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span>Resonance</span>
+                        <span class="value" id="resonanceValue">1.0</span>
+                    </label>
+                    <input type="range" id="resonance" min="0.1" max="20" value="1" step="0.1">
+                </div>
+            </section>
+
+            <!-- Noise Section -->
+            <section class="panel">
+                <h2>Noise Layer</h2>
+                <div class="control-group">
+                    <label>
+                        <span>Noise Mix</span>
+                        <span class="value" id="noiseMixValue">0%</span>
+                    </label>
+                    <input type="range" id="noiseMix" min="0" max="1" value="0" step="0.01">
+                </div>
+            </section>
+
+            <!-- Master Section -->
+            <section class="panel">
+                <h2>Master</h2>
+                <div class="control-group">
+                    <label>
+                        <span>Volume</span>
+                        <span class="value" id="volumeValue">50%</span>
+                    </label>
+                    <input type="range" id="volume" min="0" max="1" value="0.5" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span>Duration</span>
+                        <span class="value" id="durationValue">0.3s</span>
+                    </label>
+                    <input type="range" id="duration" min="0.05" max="2" value="0.3" step="0.01">
+                </div>
+            </section>
+
+            <!-- Presets -->
+            <section class="panel presets">
+                <h2>Presets</h2>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="laser">🔫 Laser</button>
+                    <button class="preset-btn" data-preset="boost">⚡ Boost</button>
+                    <button class="preset-btn" data-preset="impact">💥 Impact</button>
+                    <button class="preset-btn" data-preset="pickup">✨ Pickup</button>
+                    <button class="preset-btn" data-preset="click">🖱️ Click</button>
+                    <button class="preset-btn" data-preset="explosion">🔥 Explosion</button>
+                </div>
+            </section>
+
+            <!-- Controls -->
+            <section class="controls">
+                <button id="playBtn" class="play-btn">▶ Play</button>
+                <button id="exportBtn" class="export-btn">💾 Export WAV</button>
+            </section>
+
+            <!-- Waveform Display -->
+            <section class="panel waveform-panel">
+                <h2>Waveform</h2>
+                <canvas id="waveformCanvas" width="600" height="150"></canvas>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built by <a href="https://dreamware.studio" target="_blank">Dreamware</a> ⚡</p>
+        </footer>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
