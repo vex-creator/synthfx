@@ -409,6 +409,35 @@ class AudioEngine {
     isPreviewPlaying() {
         return this.previewOscillator !== null;
     }
+
+    /**
+     * Play a pitch sweep preview (start → end frequency)
+     * No envelope, just the raw frequency change
+     */
+    playSweepPreview(waveType, freqStart, freqEnd, duration = 0.5, volume = 0.3) {
+        const ctx = this.init();
+        const now = ctx.currentTime;
+
+        // Create oscillator
+        const oscillator = ctx.createOscillator();
+        oscillator.type = waveType;
+        oscillator.frequency.setValueAtTime(freqStart, now);
+        oscillator.frequency.linearRampToValueAtTime(freqEnd, now + duration);
+
+        // Create gain with fade in/out to avoid clicks
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.02);
+        gain.gain.setValueAtTime(volume, now + duration - 0.02);
+        gain.gain.linearRampToValueAtTime(0, now + duration);
+
+        // Connect and play
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+
+        oscillator.start(now);
+        oscillator.stop(now + duration + 0.1);
+    }
 }
 
 // Export as global

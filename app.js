@@ -154,6 +154,7 @@ const elements = {
     playBtn: document.getElementById('playBtn'),
     exportBtn: document.getElementById('exportBtn'),
     previewOscBtn: document.getElementById('previewOscBtn'),
+    previewSweepBtn: document.getElementById('previewSweepBtn'),
     
     // Canvases
     envelopeCanvas: document.getElementById('envelopeCanvas'),
@@ -178,6 +179,17 @@ function init() {
 
     // Oscillator preview button
     elements.previewOscBtn.addEventListener('click', toggleOscillatorPreview);
+
+    // Sweep preview button
+    elements.previewSweepBtn.addEventListener('click', () => {
+        audioEngine.playSweepPreview(
+            currentParams.waveType,
+            currentParams.freqStart,
+            currentParams.freqEnd,
+            0.5,  // half second sweep
+            currentParams.volume * 0.6
+        );
+    });
 
     // Filter type buttons
     elements.filterButtons.forEach(btn => {
