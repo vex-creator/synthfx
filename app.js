@@ -79,9 +79,23 @@ const elements = {
 function init() {
     customPresets = loadCustomPresets();
     
+    // Debug check
+    if (typeof PRESET_CATEGORIES === 'undefined') {
+        console.error('PRESET_CATEGORIES not loaded!');
+        return;
+    }
+    
     renderPresetBrowser();
     setupEventListeners();
     drawEnvelope();
+    
+    // Auto-select first Hyperflow preset on load
+    if (PRESET_CATEGORIES.hyperflow) {
+        const firstPreset = Object.keys(PRESET_CATEGORIES.hyperflow.presets)[0];
+        if (firstPreset) {
+            selectPreset('hyperflow', firstPreset);
+        }
+    }
 }
 
 // Render preset browser sidebar

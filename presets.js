@@ -4,6 +4,282 @@
  */
 
 const PRESET_CATEGORIES = {
+    hyperflow: {
+        name: "🚀 Hyperflow",
+        presets: {
+            tunnelEnter: {
+                name: "Tunnel Enter",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 200,
+                    freqEnd: 800,
+                    attack: 0.05,
+                    decay: 0.15,
+                    sustain: 0.4,
+                    release: 0.3,
+                    duration: 0.3,
+                    volume: 0.45,
+                    filterType: 'bandpass',
+                    cutoff: 1000,
+                    resonance: 4,
+                    noiseMix: 0.15
+                }
+            },
+            speedBoost: {
+                name: "Speed Boost",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 150,
+                    freqEnd: 900,
+                    attack: 0.01,
+                    decay: 0.08,
+                    sustain: 0.5,
+                    release: 0.25,
+                    duration: 0.25,
+                    volume: 0.5,
+                    filterType: 'bandpass',
+                    cutoff: 1200,
+                    resonance: 3,
+                    noiseMix: 0.25
+                }
+            },
+            shieldHit: {
+                name: "Shield Hit",
+                params: {
+                    waveType: 'square',
+                    freqStart: 300,
+                    freqEnd: 80,
+                    attack: 0.001,
+                    decay: 0.06,
+                    sustain: 0.15,
+                    release: 0.12,
+                    duration: 0.05,
+                    volume: 0.55,
+                    filterType: 'lowpass',
+                    cutoff: 800,
+                    resonance: 2,
+                    noiseMix: 0.4
+                }
+            },
+            shieldBreak: {
+                name: "Shield Break",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 400,
+                    freqEnd: 50,
+                    attack: 0.001,
+                    decay: 0.15,
+                    sustain: 0.1,
+                    release: 0.3,
+                    duration: 0.1,
+                    volume: 0.6,
+                    filterType: 'lowpass',
+                    cutoff: 600,
+                    resonance: 3,
+                    noiseMix: 0.6
+                }
+            },
+            shieldPickup: {
+                name: "Shield Pickup",
+                params: {
+                    waveType: 'triangle',
+                    freqStart: 400,
+                    freqEnd: 1200,
+                    attack: 0.01,
+                    decay: 0.1,
+                    sustain: 0.3,
+                    release: 0.2,
+                    duration: 0.15,
+                    volume: 0.4,
+                    filterType: 'none',
+                    cutoff: 5000,
+                    resonance: 1,
+                    noiseMix: 0
+                }
+            },
+            obstaclePass: {
+                name: "Obstacle Pass",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 600,
+                    freqEnd: 300,
+                    attack: 0.01,
+                    decay: 0.05,
+                    sustain: 0.1,
+                    release: 0.1,
+                    duration: 0.08,
+                    volume: 0.25,
+                    filterType: 'bandpass',
+                    cutoff: 800,
+                    resonance: 2,
+                    noiseMix: 0.1
+                }
+            },
+            nearMiss: {
+                name: "Near Miss",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 1000,
+                    freqEnd: 400,
+                    attack: 0.005,
+                    decay: 0.04,
+                    sustain: 0.1,
+                    release: 0.08,
+                    duration: 0.05,
+                    volume: 0.35,
+                    filterType: 'highpass',
+                    cutoff: 600,
+                    resonance: 2,
+                    noiseMix: 0.15
+                }
+            },
+            gameOver: {
+                name: "Game Over",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 300,
+                    freqEnd: 40,
+                    attack: 0.01,
+                    decay: 0.3,
+                    sustain: 0.2,
+                    release: 0.5,
+                    duration: 0.4,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 500,
+                    resonance: 2,
+                    noiseMix: 0.3
+                }
+            },
+            levelComplete: {
+                name: "Level Complete",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 523,
+                    freqEnd: 1047,
+                    attack: 0.02,
+                    decay: 0.15,
+                    sustain: 0.5,
+                    release: 0.4,
+                    duration: 0.5,
+                    volume: 0.45,
+                    filterType: 'none',
+                    cutoff: 5000,
+                    resonance: 1,
+                    noiseMix: 0
+                }
+            },
+            beatPulse: {
+                name: "Beat Pulse",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 80,
+                    freqEnd: 60,
+                    attack: 0.01,
+                    decay: 0.08,
+                    sustain: 0.2,
+                    release: 0.1,
+                    duration: 0.08,
+                    volume: 0.4,
+                    filterType: 'lowpass',
+                    cutoff: 300,
+                    resonance: 1,
+                    noiseMix: 0.05
+                }
+            },
+            tunnelCurve: {
+                name: "Tunnel Curve",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 250,
+                    freqEnd: 350,
+                    attack: 0.03,
+                    decay: 0.1,
+                    sustain: 0.3,
+                    release: 0.15,
+                    duration: 0.2,
+                    volume: 0.3,
+                    filterType: 'bandpass',
+                    cutoff: 600,
+                    resonance: 2,
+                    noiseMix: 0.1
+                }
+            },
+            warpSpeed: {
+                name: "Warp Speed",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 100,
+                    freqEnd: 1500,
+                    attack: 0.02,
+                    decay: 0.2,
+                    sustain: 0.6,
+                    release: 0.4,
+                    duration: 0.5,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 2000,
+                    resonance: 3,
+                    noiseMix: 0.3
+                }
+            },
+            comboHit: {
+                name: "Combo Hit",
+                params: {
+                    waveType: 'triangle',
+                    freqStart: 600,
+                    freqEnd: 1000,
+                    attack: 0.005,
+                    decay: 0.06,
+                    sustain: 0.2,
+                    release: 0.1,
+                    duration: 0.08,
+                    volume: 0.4,
+                    filterType: 'none',
+                    cutoff: 3000,
+                    resonance: 1,
+                    noiseMix: 0
+                }
+            },
+            countdown: {
+                name: "Countdown Beep",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 880,
+                    freqEnd: 880,
+                    attack: 0.005,
+                    decay: 0.05,
+                    sustain: 0.3,
+                    release: 0.1,
+                    duration: 0.1,
+                    volume: 0.4,
+                    filterType: 'none',
+                    cutoff: 3000,
+                    resonance: 1,
+                    noiseMix: 0
+                }
+            },
+            countdownGo: {
+                name: "Countdown GO",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 440,
+                    freqEnd: 880,
+                    attack: 0.01,
+                    decay: 0.1,
+                    sustain: 0.5,
+                    release: 0.2,
+                    duration: 0.2,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 2000,
+                    resonance: 2,
+                    noiseMix: 0.1
+                }
+            }
+        }
+    },
+    
     weapons: {
         name: "🔫 Weapons",
         presets: {
