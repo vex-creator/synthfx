@@ -92,39 +92,39 @@ class AudioEngine {
             oscillator.frequency.linearRampToValueAtTime(freqEnd, now + totalDuration);
 
             // ADSR envelope
-            oscGain.gain.setValueAtTime(0, now);
+            oscGain.gain.setValueAtTime(0.0001, now);
             oscGain.gain.linearRampToValueAtTime(1 - noiseMix, now + attack);
-            oscGain.gain.linearRampToValueAtTime(sustain * (1 - noiseMix), now + attack + decay);
-            oscGain.gain.setValueAtTime(sustain * (1 - noiseMix), now + attack + decay + duration);
-            oscGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+            oscGain.gain.linearRampToValueAtTime(Math.max(0.0001, sustain * (1 - noiseMix)), now + attack + decay);
+            oscGain.gain.setValueAtTime(Math.max(0.0001, sustain * (1 - noiseMix)), now + attack + decay + duration);
+            oscGain.gain.exponentialRampToValueAtTime(0.0001, now + totalDuration + 0.05);
 
             oscillator.connect(oscGain);
             oscGain.connect(outputNode);
 
             oscillator.start(now);
-            oscillator.stop(now + totalDuration + 0.1);
+            oscillator.stop(now + totalDuration + 0.5);
         }
 
         // Noise layer
         if (noiseMix > 0) {
-            const noiseBuffer = this.createNoiseBuffer(ctx, totalDuration + 0.1);
+            const noiseBuffer = this.createNoiseBuffer(ctx, totalDuration + 0.5);
             const noiseSource = ctx.createBufferSource();
             const noiseGain = ctx.createGain();
 
             noiseSource.buffer = noiseBuffer;
 
             // ADSR for noise
-            noiseGain.gain.setValueAtTime(0, now);
+            noiseGain.gain.setValueAtTime(0.0001, now);
             noiseGain.gain.linearRampToValueAtTime(noiseMix, now + attack);
-            noiseGain.gain.linearRampToValueAtTime(sustain * noiseMix, now + attack + decay);
-            noiseGain.gain.setValueAtTime(sustain * noiseMix, now + attack + decay + duration);
-            noiseGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+            noiseGain.gain.linearRampToValueAtTime(Math.max(0.0001, sustain * noiseMix), now + attack + decay);
+            noiseGain.gain.setValueAtTime(Math.max(0.0001, sustain * noiseMix), now + attack + decay + duration);
+            noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + totalDuration + 0.05);
 
             noiseSource.connect(noiseGain);
             noiseGain.connect(outputNode);
 
             noiseSource.start(now);
-            noiseSource.stop(now + totalDuration + 0.1);
+            noiseSource.stop(now + totalDuration + 0.5);
         }
     }
 
@@ -170,7 +170,7 @@ class AudioEngine {
         } = params;
 
         const totalDuration = attack + decay + duration + release;
-        const numSamples = Math.ceil(sampleRate * (totalDuration + 0.1));
+        const numSamples = Math.ceil(sampleRate * (totalDuration + 0.6));
         
         const offlineCtx = new OfflineAudioContext(1, numSamples, sampleRate);
         const now = 0;
@@ -202,39 +202,39 @@ class AudioEngine {
             oscillator.frequency.linearRampToValueAtTime(freqEnd, now + totalDuration);
 
             // ADSR envelope
-            oscGain.gain.setValueAtTime(0, now);
+            oscGain.gain.setValueAtTime(0.0001, now);
             oscGain.gain.linearRampToValueAtTime(1 - noiseMix, now + attack);
-            oscGain.gain.linearRampToValueAtTime(sustain * (1 - noiseMix), now + attack + decay);
-            oscGain.gain.setValueAtTime(sustain * (1 - noiseMix), now + attack + decay + duration);
-            oscGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+            oscGain.gain.linearRampToValueAtTime(Math.max(0.0001, sustain * (1 - noiseMix)), now + attack + decay);
+            oscGain.gain.setValueAtTime(Math.max(0.0001, sustain * (1 - noiseMix)), now + attack + decay + duration);
+            oscGain.gain.exponentialRampToValueAtTime(0.0001, now + totalDuration + 0.05);
 
             oscillator.connect(oscGain);
             oscGain.connect(outputNode);
 
             oscillator.start(now);
-            oscillator.stop(now + totalDuration + 0.1);
+            oscillator.stop(now + totalDuration + 0.5);
         }
 
         // Noise layer
         if (noiseMix > 0) {
-            const noiseBuffer = this.createNoiseBufferOffline(offlineCtx, totalDuration + 0.1);
+            const noiseBuffer = this.createNoiseBufferOffline(offlineCtx, totalDuration + 0.5);
             const noiseSource = offlineCtx.createBufferSource();
             const noiseGain = offlineCtx.createGain();
 
             noiseSource.buffer = noiseBuffer;
 
             // ADSR for noise
-            noiseGain.gain.setValueAtTime(0, now);
+            noiseGain.gain.setValueAtTime(0.0001, now);
             noiseGain.gain.linearRampToValueAtTime(noiseMix, now + attack);
-            noiseGain.gain.linearRampToValueAtTime(sustain * noiseMix, now + attack + decay);
-            noiseGain.gain.setValueAtTime(sustain * noiseMix, now + attack + decay + duration);
-            noiseGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+            noiseGain.gain.linearRampToValueAtTime(Math.max(0.0001, sustain * noiseMix), now + attack + decay);
+            noiseGain.gain.setValueAtTime(Math.max(0.0001, sustain * noiseMix), now + attack + decay + duration);
+            noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + totalDuration + 0.05);
 
             noiseSource.connect(noiseGain);
             noiseGain.connect(outputNode);
 
             noiseSource.start(now);
-            noiseSource.stop(now + totalDuration + 0.1);
+            noiseSource.stop(now + totalDuration + 0.5);
         }
 
         // Render
