@@ -23,108 +23,14 @@ let currentParams = {
     noiseMix: 0
 };
 
-// Presets
-const presets = {
-    laser: {
-        waveType: 'sawtooth',
-        freqStart: 880,
-        freqEnd: 110,
-        attack: 0.001,
-        decay: 0.05,
-        sustain: 0.2,
-        release: 0.15,
-        duration: 0.1,
-        volume: 0.4,
-        filterType: 'lowpass',
-        cutoff: 3000,
-        resonance: 2,
-        noiseMix: 0.1
-    },
-    boost: {
-        waveType: 'sine',
-        freqStart: 150,
-        freqEnd: 600,
-        attack: 0.02,
-        decay: 0.1,
-        sustain: 0.5,
-        release: 0.3,
-        duration: 0.3,
-        volume: 0.5,
-        filterType: 'bandpass',
-        cutoff: 800,
-        resonance: 3,
-        noiseMix: 0.3
-    },
-    impact: {
-        waveType: 'sine',
-        freqStart: 150,
-        freqEnd: 40,
-        attack: 0.001,
-        decay: 0.08,
-        sustain: 0.1,
-        release: 0.1,
-        duration: 0.05,
-        volume: 0.7,
-        filterType: 'lowpass',
-        cutoff: 500,
-        resonance: 1,
-        noiseMix: 0.5
-    },
-    pickup: {
-        waveType: 'triangle',
-        freqStart: 523,  // C5
-        freqEnd: 1047,   // C6
-        attack: 0.01,
-        decay: 0.1,
-        sustain: 0.3,
-        release: 0.2,
-        duration: 0.15,
-        volume: 0.4,
-        filterType: 'none',
-        cutoff: 5000,
-        resonance: 1,
-        noiseMix: 0
-    },
-    click: {
-        waveType: 'sine',
-        freqStart: 1500,
-        freqEnd: 1200,
-        attack: 0.001,
-        decay: 0.02,
-        sustain: 0,
-        release: 0.01,
-        duration: 0.01,
-        volume: 0.3,
-        filterType: 'highpass',
-        cutoff: 800,
-        resonance: 1,
-        noiseMix: 0.05
-    },
-    explosion: {
-        waveType: 'sine',
-        freqStart: 100,
-        freqEnd: 30,
-        attack: 0.001,
-        decay: 0.3,
-        sustain: 0.2,
-        release: 0.5,
-        duration: 0.3,
-        volume: 0.6,
-        filterType: 'lowpass',
-        cutoff: 800,
-        resonance: 1,
-        noiseMix: 0.7
-    }
-};
+let currentPresetId = null;
+let customPresets = {};
 
 // DOM Elements
 const elements = {
-    // Wave type buttons
     waveButtons: document.querySelectorAll('.wave-btn'),
     filterButtons: document.querySelectorAll('.filter-btn'),
-    presetButtons: document.querySelectorAll('.preset-btn'),
     
-    // Sliders
     freqStart: document.getElementById('freqStart'),
     freqEnd: document.getElementById('freqEnd'),
     attack: document.getElementById('attack'),
@@ -137,7 +43,6 @@ const elements = {
     volume: document.getElementById('volume'),
     duration: document.getElementById('duration'),
     
-    // Value displays
     freqStartValue: document.getElementById('freqStartValue'),
     freqEndValue: document.getElementById('freqEndValue'),
     attackValue: document.getElementById('attackValue'),
@@ -150,19 +55,153 @@ const elements = {
     volumeValue: document.getElementById('volumeValue'),
     durationValue: document.getElementById('durationValue'),
     
-    // Buttons
     playBtn: document.getElementById('playBtn'),
     exportBtn: document.getElementById('exportBtn'),
     previewOscBtn: document.getElementById('previewOscBtn'),
     previewSweepBtn: document.getElementById('previewSweepBtn'),
+    savePresetBtn: document.getElementById('savePresetBtn'),
     
-    // Canvases
+    presetCategories: document.getElementById('presetCategories'),
+    customPresetsContainer: document.getElementById('customPresets'),
+    presetSearch: document.getElementById('presetSearch'),
+    
+    saveModal: document.getElementById('saveModal'),
+    presetName: document.getElementById('presetName'),
+    presetCategory: document.getElementById('presetCategory'),
+    cancelSave: document.getElementById('cancelSave'),
+    confirmSave: document.getElementById('confirmSave'),
+    
     envelopeCanvas: document.getElementById('envelopeCanvas'),
     waveformCanvas: document.getElementById('waveformCanvas')
 };
 
-// Initialize event listeners
+// Initialize
 function init() {
+    customPresets = loadCustomPresets();
+    
+    renderPresetBrowser();
+    setupEventListeners();
+    drawEnvelope();
+}
+
+// Render preset browser sidebar
+function renderPresetBrowser() {
+    const container = elements.presetCategories;
+    container.innerHTML = '';
+    
+    for (const [categoryId, category] of Object.entries(PRESET_CATEGORIES)) {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category';
+        
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.dataset.category = categoryId;
+        header.innerHTML = `<span>${category.name}</span><span class="toggle">▼</span>`;
+        
+        const items = document.createElement('div');
+        items.className = 'category-items';
+        items.dataset.category = categoryId;
+        
+        for (const [presetId, preset] of Object.entries(category.presets)) {
+            const item = document.createElement('div');
+            item.className = 'preset-item';
+            item.dataset.preset = `${categoryId}.${presetId}`;
+            item.textContent = preset.name;
+            item.addEventListener('click', () => selectPreset(categoryId, presetId));
+            items.appendChild(item);
+        }
+        
+        header.addEventListener('click', () => toggleCategory(categoryId));
+        
+        categoryEl.appendChild(header);
+        categoryEl.appendChild(items);
+        container.appendChild(categoryEl);
+    }
+    
+    renderCustomPresets();
+}
+
+// Render custom presets
+function renderCustomPresets() {
+    const container = elements.customPresetsContainer.querySelector('.category-items');
+    container.innerHTML = '';
+    
+    const presets = Object.entries(customPresets);
+    
+    if (presets.length === 0) {
+        container.innerHTML = '<div class="preset-item" style="color: var(--text-secondary); font-style: italic;">No saved presets</div>';
+        return;
+    }
+    
+    for (const [id, preset] of presets) {
+        const item = document.createElement('div');
+        item.className = 'preset-item';
+        item.dataset.preset = `custom.${id}`;
+        
+        const name = document.createElement('span');
+        name.textContent = preset.name;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = '✕';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteCustomPreset(id);
+        });
+        
+        item.appendChild(name);
+        item.appendChild(deleteBtn);
+        item.addEventListener('click', () => selectCustomPreset(id));
+        container.appendChild(item);
+    }
+}
+
+// Toggle category collapse
+function toggleCategory(categoryId) {
+    const header = document.querySelector(`.category-header[data-category="${categoryId}"]`);
+    const items = document.querySelector(`.category-items[data-category="${categoryId}"]`);
+    
+    header.classList.toggle('collapsed');
+    items.classList.toggle('collapsed');
+}
+
+// Select a preset
+function selectPreset(categoryId, presetId) {
+    const preset = PRESET_CATEGORIES[categoryId].presets[presetId];
+    if (preset) {
+        applyPreset(preset.params);
+        setActivePreset(`${categoryId}.${presetId}`);
+        playSound();
+    }
+}
+
+// Select custom preset
+function selectCustomPreset(id) {
+    const preset = customPresets[id];
+    if (preset) {
+        applyPreset(preset.params);
+        setActivePreset(`custom.${id}`);
+        playSound();
+    }
+}
+
+// Set active preset visual
+function setActivePreset(fullId) {
+    currentPresetId = fullId;
+    document.querySelectorAll('.preset-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.preset === fullId);
+    });
+}
+
+// Delete custom preset
+function deleteCustomPreset(id) {
+    delete customPresets[id];
+    saveCustomPresets(customPresets);
+    renderCustomPresets();
+}
+
+// Setup event listeners
+function setupEventListeners() {
     // Wave type buttons
     elements.waveButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -170,25 +209,10 @@ function init() {
             btn.classList.add('active');
             currentParams.waveType = btn.dataset.wave;
             
-            // Update preview if playing
             if (audioEngine.isPreviewPlaying()) {
                 audioEngine.updatePreview(currentParams.waveType, currentParams.freqStart);
             }
         });
-    });
-
-    // Oscillator preview button
-    elements.previewOscBtn.addEventListener('click', toggleOscillatorPreview);
-
-    // Sweep preview button
-    elements.previewSweepBtn.addEventListener('click', () => {
-        audioEngine.playSweepPreview(
-            currentParams.waveType,
-            currentParams.freqStart,
-            currentParams.freqEnd,
-            0.5,  // half second sweep
-            currentParams.volume * 0.6
-        );
     });
 
     // Filter type buttons
@@ -197,18 +221,6 @@ function init() {
             elements.filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentParams.filterType = btn.dataset.filter;
-        });
-    });
-
-    // Preset buttons
-    elements.presetButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const preset = presets[btn.dataset.preset];
-            if (preset) {
-                applyPreset(preset);
-                // Play automatically when preset is clicked
-                playSound();
-            }
         });
     });
 
@@ -225,25 +237,62 @@ function init() {
     setupSlider('volume', 'volumeValue', v => `${Math.round(v * 100)}%`);
     setupSlider('duration', 'durationValue', v => `${v.toFixed(2)}s`);
 
-    // Play button
+    // Buttons
     elements.playBtn.addEventListener('click', playSound);
-
-    // Export button
     elements.exportBtn.addEventListener('click', exportSound);
+    elements.previewOscBtn.addEventListener('click', toggleOscillatorPreview);
+    elements.previewSweepBtn.addEventListener('click', () => {
+        audioEngine.playSweepPreview(
+            currentParams.waveType,
+            currentParams.freqStart,
+            currentParams.freqEnd,
+            0.5,
+            currentParams.volume * 0.6
+        );
+    });
 
-    // Initial envelope draw
-    drawEnvelope();
+    // Save preset
+    elements.savePresetBtn.addEventListener('click', () => {
+        elements.saveModal.classList.add('active');
+        elements.presetName.value = '';
+        elements.presetName.focus();
+    });
+    
+    elements.cancelSave.addEventListener('click', () => {
+        elements.saveModal.classList.remove('active');
+    });
+    
+    elements.confirmSave.addEventListener('click', saveNewPreset);
+    
+    // Close modal on background click
+    elements.saveModal.addEventListener('click', (e) => {
+        if (e.target === elements.saveModal) {
+            elements.saveModal.classList.remove('active');
+        }
+    });
 
-    // Keyboard shortcut
+    // Search
+    elements.presetSearch.addEventListener('input', filterPresets);
+
+    // Category toggle for custom presets
+    const customHeader = elements.customPresetsContainer.querySelector('.category-header');
+    customHeader.addEventListener('click', () => {
+        customHeader.classList.toggle('collapsed');
+        elements.customPresetsContainer.querySelector('.category-items').classList.toggle('collapsed');
+    });
+
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        if (e.target.tagName === 'INPUT') return;
+        
+        if (e.code === 'Space') {
             e.preventDefault();
             playSound();
         }
     });
 }
 
-// Setup a slider with value display and parameter binding
+// Setup slider
 function setupSlider(id, valueId, formatter) {
     const slider = elements[id];
     const valueDisplay = elements[valueId];
@@ -253,22 +302,94 @@ function setupSlider(id, valueId, formatter) {
         currentParams[id] = value;
         valueDisplay.textContent = formatter(value);
         
-        // Redraw envelope if ADSR changed
         if (['attack', 'decay', 'sustain', 'release', 'duration'].includes(id)) {
             drawEnvelope();
         }
         
-        // Update preview pitch if playing
         if (id === 'freqStart' && audioEngine.isPreviewPlaying()) {
             audioEngine.updatePreview(currentParams.waveType, value);
         }
     };
 
     slider.addEventListener('input', update);
-    update(); // Initial value
+    update();
 }
 
-// Toggle oscillator preview (raw waveform)
+// Apply preset to UI
+function applyPreset(params) {
+    Object.assign(currentParams, params);
+    
+    // Update wave buttons
+    elements.waveButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.wave === params.waveType);
+    });
+
+    // Update filter buttons
+    elements.filterButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === params.filterType);
+    });
+
+    // Update sliders
+    for (const [key, value] of Object.entries(params)) {
+        if (elements[key]) {
+            elements[key].value = value;
+        }
+    }
+
+    // Update displays
+    elements.freqStartValue.textContent = `${Math.round(params.freqStart)} Hz`;
+    elements.freqEndValue.textContent = `${Math.round(params.freqEnd)} Hz`;
+    elements.attackValue.textContent = `${params.attack.toFixed(3)}s`;
+    elements.decayValue.textContent = `${params.decay.toFixed(3)}s`;
+    elements.sustainValue.textContent = params.sustain.toFixed(2);
+    elements.releaseValue.textContent = `${params.release.toFixed(3)}s`;
+    elements.cutoffValue.textContent = `${Math.round(params.cutoff)} Hz`;
+    elements.resonanceValue.textContent = params.resonance.toFixed(1);
+    elements.noiseMixValue.textContent = `${Math.round(params.noiseMix * 100)}%`;
+    elements.volumeValue.textContent = `${Math.round(params.volume * 100)}%`;
+    elements.durationValue.textContent = `${params.duration.toFixed(2)}s`;
+
+    drawEnvelope();
+}
+
+// Save new preset
+function saveNewPreset() {
+    const name = elements.presetName.value.trim();
+    if (!name) return;
+    
+    const id = `preset_${Date.now()}`;
+    customPresets[id] = {
+        name: name,
+        params: { ...currentParams }
+    };
+    
+    saveCustomPresets(customPresets);
+    renderCustomPresets();
+    elements.saveModal.classList.remove('active');
+    setActivePreset(`custom.${id}`);
+}
+
+// Filter presets by search
+function filterPresets(e) {
+    const query = e.target.value.toLowerCase();
+    
+    document.querySelectorAll('.preset-item').forEach(item => {
+        const name = item.textContent.toLowerCase();
+        item.style.display = name.includes(query) ? '' : 'none';
+    });
+    
+    // Show/hide categories based on visible items
+    document.querySelectorAll('.category-items').forEach(cat => {
+        const visibleItems = cat.querySelectorAll('.preset-item:not([style*="display: none"])');
+        const header = cat.previousElementSibling;
+        if (header && header.classList.contains('category-header')) {
+            header.style.display = visibleItems.length > 0 || query === '' ? '' : 'none';
+        }
+        cat.style.display = visibleItems.length > 0 || query === '' ? '' : 'none';
+    });
+}
+
+// Toggle oscillator preview
 function toggleOscillatorPreview() {
     if (audioEngine.isPreviewPlaying()) {
         audioEngine.stopPreview();
@@ -278,66 +399,21 @@ function toggleOscillatorPreview() {
         audioEngine.startPreview(
             currentParams.waveType,
             currentParams.freqStart,
-            currentParams.volume * 0.5  // Lower volume for preview
+            currentParams.volume * 0.5
         );
         elements.previewOscBtn.classList.add('active');
         elements.previewOscBtn.textContent = '⏹ Stop';
     }
 }
 
-// Apply a preset to all controls
-function applyPreset(preset) {
-    Object.assign(currentParams, preset);
-    
-    // Update wave buttons
-    elements.waveButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.wave === preset.waveType);
-    });
-
-    // Update filter buttons
-    elements.filterButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === preset.filterType);
-    });
-
-    // Update sliders
-    elements.freqStart.value = preset.freqStart;
-    elements.freqEnd.value = preset.freqEnd;
-    elements.attack.value = preset.attack;
-    elements.decay.value = preset.decay;
-    elements.sustain.value = preset.sustain;
-    elements.release.value = preset.release;
-    elements.cutoff.value = preset.cutoff;
-    elements.resonance.value = preset.resonance;
-    elements.noiseMix.value = preset.noiseMix;
-    elements.volume.value = preset.volume;
-    elements.duration.value = preset.duration;
-
-    // Update value displays
-    elements.freqStartValue.textContent = `${Math.round(preset.freqStart)} Hz`;
-    elements.freqEndValue.textContent = `${Math.round(preset.freqEnd)} Hz`;
-    elements.attackValue.textContent = `${preset.attack.toFixed(3)}s`;
-    elements.decayValue.textContent = `${preset.decay.toFixed(3)}s`;
-    elements.sustainValue.textContent = preset.sustain.toFixed(2);
-    elements.releaseValue.textContent = `${preset.release.toFixed(3)}s`;
-    elements.cutoffValue.textContent = `${Math.round(preset.cutoff)} Hz`;
-    elements.resonanceValue.textContent = preset.resonance.toFixed(1);
-    elements.noiseMixValue.textContent = `${Math.round(preset.noiseMix * 100)}%`;
-    elements.volumeValue.textContent = `${Math.round(preset.volume * 100)}%`;
-    elements.durationValue.textContent = `${preset.duration.toFixed(2)}s`;
-
-    drawEnvelope();
-}
-
-// Play the current sound
+// Play sound
 function playSound() {
     audioEngine.play(currentParams);
-    
-    // Render for visualization
     audioEngine.render(currentParams);
     drawWaveform();
 }
 
-// Export current sound as WAV
+// Export sound
 function exportSound() {
     const blob = audioEngine.exportWAV(currentParams);
     const url = URL.createObjectURL(blob);
@@ -348,53 +424,46 @@ function exportSound() {
     URL.revokeObjectURL(url);
 }
 
-// Draw ADSR envelope visualization
+// Draw envelope
 function drawEnvelope() {
     const canvas = elements.envelopeCanvas;
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    const padding = 10;
+    const padding = 8;
 
-    // Clear
     ctx.fillStyle = '#1a1a25';
     ctx.fillRect(0, 0, width, height);
 
     const { attack, decay, sustain, release, duration } = currentParams;
     const totalDuration = attack + decay + duration + release;
 
-    // Calculate x positions
     const attackX = padding + (attack / totalDuration) * (width - padding * 2);
     const decayX = padding + ((attack + decay) / totalDuration) * (width - padding * 2);
     const sustainX = padding + ((attack + decay + duration) / totalDuration) * (width - padding * 2);
     const releaseX = width - padding;
 
-    // Y positions
     const topY = padding;
     const sustainY = padding + (1 - sustain) * (height - padding * 2);
     const bottomY = height - padding;
 
-    // Draw envelope
     ctx.beginPath();
     ctx.moveTo(padding, bottomY);
-    ctx.lineTo(attackX, topY);          // Attack
-    ctx.lineTo(decayX, sustainY);       // Decay
-    ctx.lineTo(sustainX, sustainY);     // Sustain
-    ctx.lineTo(releaseX, bottomY);      // Release
+    ctx.lineTo(attackX, topY);
+    ctx.lineTo(decayX, sustainY);
+    ctx.lineTo(sustainX, sustainY);
+    ctx.lineTo(releaseX, bottomY);
 
-    // Gradient fill
     const gradient = ctx.createLinearGradient(0, 0, width, 0);
     gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
     gradient.addColorStop(1, 'rgba(255, 0, 170, 0.3)');
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Stroke
     ctx.strokeStyle = '#00f0ff';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Draw points
     const points = [
         { x: padding, y: bottomY },
         { x: attackX, y: topY },
@@ -406,35 +475,24 @@ function drawEnvelope() {
     ctx.fillStyle = '#00f0ff';
     points.forEach(p => {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
         ctx.fill();
     });
-
-    // Labels
-    ctx.fillStyle = '#666';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('A', (padding + attackX) / 2, bottomY - 5);
-    ctx.fillText('D', (attackX + decayX) / 2, sustainY - 5);
-    ctx.fillText('S', (decayX + sustainX) / 2, sustainY - 5);
-    ctx.fillText('R', (sustainX + releaseX) / 2, bottomY - 5);
 }
 
-// Draw waveform visualization
+// Draw waveform
 function drawWaveform() {
     const canvas = elements.waveformCanvas;
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
 
-    // Clear
     ctx.fillStyle = '#1a1a25';
     ctx.fillRect(0, 0, width, height);
 
     const buffer = audioEngine.getLastRenderedBuffer();
     if (!buffer) return;
 
-    // Draw center line
     ctx.strokeStyle = '#2a2a3a';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -442,7 +500,6 @@ function drawWaveform() {
     ctx.lineTo(width, height / 2);
     ctx.stroke();
 
-    // Draw waveform
     const step = Math.ceil(buffer.length / width);
     ctx.beginPath();
     ctx.moveTo(0, height / 2);
@@ -451,7 +508,6 @@ function drawWaveform() {
         const sampleIndex = i * step;
         let min = 1, max = -1;
 
-        // Get min/max for this pixel column
         for (let j = 0; j < step && sampleIndex + j < buffer.length; j++) {
             const sample = buffer[sampleIndex + j];
             if (sample < min) min = sample;
@@ -462,7 +518,6 @@ function drawWaveform() {
         ctx.lineTo(i, y);
     }
 
-    // Gradient stroke
     const gradient = ctx.createLinearGradient(0, 0, width, 0);
     gradient.addColorStop(0, '#00f0ff');
     gradient.addColorStop(0.5, '#8855ff');
@@ -472,5 +527,5 @@ function drawWaveform() {
     ctx.stroke();
 }
 
-// Start the app
+// Start
 init();
