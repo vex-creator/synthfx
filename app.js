@@ -65,6 +65,7 @@ const elements = {
     
     playBtn: document.getElementById('playBtn'),
     exportBtn: document.getElementById('exportBtn'),
+    exportVariantsBtn: document.getElementById('exportVariantsBtn'),
     previewOscBtn: document.getElementById('previewOscBtn'),
     previewSweepBtn: document.getElementById('previewSweepBtn'),
     savePresetBtn: document.getElementById('savePresetBtn'),
@@ -269,6 +270,7 @@ function setupEventListeners() {
     // Buttons
     elements.playBtn.addEventListener('click', playSound);
     elements.exportBtn.addEventListener('click', exportSound);
+    elements.exportVariantsBtn.addEventListener('click', exportVariants);
     elements.previewOscBtn.addEventListener('click', toggleOscillatorPreview);
     elements.previewSweepBtn.addEventListener('click', () => {
         audioEngine.playSweepPreview(
@@ -465,8 +467,40 @@ async function exportSound() {
         a.click();
         URL.revokeObjectURL(url);
     } finally {
-        elements.exportBtn.textContent = '⬇ Export WAV';
+        elements.exportBtn.textContent = '💾 Export WAV';
         elements.exportBtn.disabled = false;
+    }
+}
+
+// Export multiple variants
+async function exportVariants() {
+    elements.exportVariantsBtn.textContent = '⏳ Rendering 1/6...';
+    elements.exportVariantsBtn.disabled = true;
+    
+    try {
+        const baseName = currentPresetId ? currentPresetId.split('.').pop() : 'sound';
+        const timestamp = Date.now();
+        
+        for (let i = 0; i < 6; i++) {
+            elements.exportVariantsBtn.textContent = `⏳ Rendering ${i + 1}/6...`;
+            
+            // First one is original, rest are variants
+            const params = i === 0 ? currentParams : audioEngine.generateVariant(currentParams);
+            const blob = await audioEngine.exportWAV(params);
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${baseName}_${String(i + 1).padStart(2, '0')}_${timestamp}.wav`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Small delay between downloads
+            await new Promise(r => setTimeout(r, 150));
+        }
+    } finally {
+        elements.exportVariantsBtn.textContent = '🎲 Export 6 Variants';
+        elements.exportVariantsBtn.disabled = false;
     }
 }
 

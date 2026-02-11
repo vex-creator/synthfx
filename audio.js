@@ -486,6 +486,49 @@ class AudioEngine {
     }
 
     /**
+     * Generate a variant of params with subtle randomization
+     */
+    generateVariant(params, intensity = 0.15) {
+        const vary = (value, range) => {
+            const variation = (Math.random() - 0.5) * 2 * range * intensity;
+            return value * (1 + variation);
+        };
+        
+        const varyInt = (value, range) => {
+            return Math.round(vary(value, range));
+        };
+
+        return {
+            ...params,
+            freqStart: varyInt(params.freqStart, 0.2),
+            freqEnd: varyInt(params.freqEnd, 0.2),
+            attack: Math.max(0.001, vary(params.attack, 0.3)),
+            decay: Math.max(0.01, vary(params.decay, 0.25)),
+            sustain: Math.min(1, Math.max(0, vary(params.sustain, 0.2))),
+            release: Math.max(0.01, vary(params.release, 0.25)),
+            duration: Math.max(0.01, vary(params.duration, 0.2)),
+            cutoff: varyInt(params.cutoff, 0.15),
+            resonance: Math.max(0.1, vary(params.resonance, 0.2)),
+            volume: Math.min(1, Math.max(0.1, vary(params.volume, 0.1)))
+        };
+    }
+
+    /**
+     * Export multiple variants of a sound
+     */
+    async exportVariants(params, count = 6) {
+        const blobs = [];
+        
+        for (let i = 0; i < count; i++) {
+            const variantParams = i === 0 ? params : this.generateVariant(params);
+            const blob = await this.exportWAV(variantParams);
+            blobs.push(blob);
+        }
+        
+        return blobs;
+    }
+
+    /**
      * Get the last rendered buffer for visualization
      */
     getLastRenderedBuffer() {
