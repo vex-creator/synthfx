@@ -129,7 +129,119 @@ class AudioEngine {
     }
 
     /**
-     * Render sound to an AudioBuffer (for export and visualization)
+     * Render sound to an AudioBuffer using OfflineAudioContext
+     * This ensures the export sounds identical to the preview
+     */
+    async renderOffline(params) {
+        const sampleRate = 44100;
+        const {
+            waveType = 'sine',
+            freqStart = 440,
+            freqEnd = 440,
+            attack = 0.01,
+            decay = 0.1,
+            sustain = 0.5,
+            release = 0.2,
+            duration = 0.3,
+            volume = 0.5,
+            filterType = 'lowpass',
+            cutoff = 2000,
+            resonance = 1,
+            noiseMix = 0
+        } = params;
+
+        const totalDuration = attack + decay + duration + release;
+        const numSamples = Math.ceil(sampleRate * (totalDuration + 0.1));
+        
+        const offlineCtx = new OfflineAudioContext(1, numSamples, sampleRate);
+        const now = 0;
+
+        // Master gain
+        const masterGain = offlineCtx.createGain();
+        masterGain.connect(offlineCtx.destination);
+        masterGain.gain.value = volume;
+
+        // Filter (if enabled)
+        let filterNode = null;
+        if (filterType !== 'none') {
+            filterNode = offlineCtx.createBiquadFilter();
+            filterNode.type = filterType;
+            filterNode.frequency.value = cutoff;
+            filterNode.Q.value = resonance;
+            filterNode.connect(masterGain);
+        }
+
+        const outputNode = filterNode || masterGain;
+
+        // Oscillator
+        if (noiseMix < 1) {
+            const oscillator = offlineCtx.createOscillator();
+            const oscGain = offlineCtx.createGain();
+            
+            oscillator.type = waveType;
+            oscillator.frequency.setValueAtTime(freqStart, now);
+            oscillator.frequency.linearRampToValueAtTime(freqEnd, now + totalDuration);
+
+            // ADSR envelope
+            oscGain.gain.setValueAtTime(0, now);
+            oscGain.gain.linearRampToValueAtTime(1 - noiseMix, now + attack);
+            oscGain.gain.linearRampToValueAtTime(sustain * (1 - noiseMix), now + attack + decay);
+            oscGain.gain.setValueAtTime(sustain * (1 - noiseMix), now + attack + decay + duration);
+            oscGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+
+            oscillator.connect(oscGain);
+            oscGain.connect(outputNode);
+
+            oscillator.start(now);
+            oscillator.stop(now + totalDuration + 0.1);
+        }
+
+        // Noise layer
+        if (noiseMix > 0) {
+            const noiseBuffer = this.createNoiseBufferOffline(offlineCtx, totalDuration + 0.1);
+            const noiseSource = offlineCtx.createBufferSource();
+            const noiseGain = offlineCtx.createGain();
+
+            noiseSource.buffer = noiseBuffer;
+
+            // ADSR for noise
+            noiseGain.gain.setValueAtTime(0, now);
+            noiseGain.gain.linearRampToValueAtTime(noiseMix, now + attack);
+            noiseGain.gain.linearRampToValueAtTime(sustain * noiseMix, now + attack + decay);
+            noiseGain.gain.setValueAtTime(sustain * noiseMix, now + attack + decay + duration);
+            noiseGain.gain.linearRampToValueAtTime(0, now + totalDuration);
+
+            noiseSource.connect(noiseGain);
+            noiseGain.connect(outputNode);
+
+            noiseSource.start(now);
+            noiseSource.stop(now + totalDuration + 0.1);
+        }
+
+        // Render
+        const renderedBuffer = await offlineCtx.startRendering();
+        this.lastRenderedBuffer = renderedBuffer.getChannelData(0);
+        return this.lastRenderedBuffer;
+    }
+
+    /**
+     * Create noise buffer for offline context
+     */
+    createNoiseBufferOffline(ctx, duration) {
+        const sampleRate = ctx.sampleRate;
+        const bufferSize = Math.ceil(sampleRate * duration);
+        const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Synchronous render for waveform display (uses simple approximation)
      */
     render(params) {
         const sampleRate = 44100;
@@ -156,12 +268,7 @@ class AudioEngine {
         // Generate oscillator waveform
         for (let i = 0; i < numSamples; i++) {
             const t = i / sampleRate;
-            const progress = t / totalDuration;
             
-            // Frequency interpolation
-            const freq = freqStart + (freqEnd - freqStart) * progress;
-            
-            // Phase accumulation for smooth frequency sweep
             let sample = 0;
 
             // Oscillator (if not 100% noise)
@@ -181,7 +288,7 @@ class AudioEngine {
             buffer[i] = sample * envelope * volume;
         }
 
-        // Apply filter (simple IIR approximation)
+        // Apply filter (simple IIR approximation for display only)
         if (filterType !== 'none') {
             this.applyFilter(buffer, sampleRate, filterType, cutoff, resonance);
         }
@@ -285,10 +392,10 @@ class AudioEngine {
     }
 
     /**
-     * Export rendered buffer as WAV file
+     * Export rendered buffer as WAV file (async, uses OfflineAudioContext)
      */
-    exportWAV(params) {
-        const buffer = this.render(params);
+    async exportWAV(params) {
+        const buffer = await this.renderOffline(params);
         const sampleRate = 44100;
         const numChannels = 1;
         const bitsPerSample = 16;

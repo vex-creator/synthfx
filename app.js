@@ -428,14 +428,22 @@ function playSound() {
 }
 
 // Export sound
-function exportSound() {
-    const blob = audioEngine.exportWAV(currentParams);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `synthfx-${Date.now()}.wav`;
-    a.click();
-    URL.revokeObjectURL(url);
+async function exportSound() {
+    elements.exportBtn.textContent = '⏳ Rendering...';
+    elements.exportBtn.disabled = true;
+    
+    try {
+        const blob = await audioEngine.exportWAV(currentParams);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `synthfx-${Date.now()}.wav`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } finally {
+        elements.exportBtn.textContent = '⬇ Export WAV';
+        elements.exportBtn.disabled = false;
+    }
 }
 
 // Draw envelope
