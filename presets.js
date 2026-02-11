@@ -454,6 +454,180 @@ const PRESET_CATEGORIES = {
         }
     },
 
+    glitches: {
+        name: "🔀 Glitches",
+        presets: {
+            matrixBreak: {
+                name: "Matrix Break",
+                params: {
+                    waveType: 'square',
+                    freqStart: 2000,
+                    freqEnd: 50,
+                    attack: 0.001,
+                    decay: 0.3,
+                    sustain: 0.2,
+                    release: 0.4,
+                    duration: 0.5,
+                    volume: 0.5,
+                    filterType: 'bandpass',
+                    cutoff: 1500,
+                    resonance: 8,
+                    noiseMix: 0.3,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 4,
+                    bitcrushRate: 0.15
+                }
+            },
+            dataCorrupt: {
+                name: "Data Corrupt",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 1500,
+                    freqEnd: 100,
+                    attack: 0.002,
+                    decay: 0.2,
+                    sustain: 0.3,
+                    release: 0.5,
+                    duration: 0.6,
+                    volume: 0.5,
+                    filterType: 'highpass',
+                    cutoff: 400,
+                    resonance: 5,
+                    noiseMix: 0.4,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 3,
+                    bitcrushRate: 0.1
+                }
+            },
+            systemError: {
+                name: "System Error",
+                params: {
+                    waveType: 'square',
+                    freqStart: 800,
+                    freqEnd: 200,
+                    attack: 0.001,
+                    decay: 0.15,
+                    sustain: 0.4,
+                    release: 0.6,
+                    duration: 0.8,
+                    volume: 0.45,
+                    filterType: 'bandpass',
+                    cutoff: 1000,
+                    resonance: 10,
+                    noiseMix: 0.35,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 5,
+                    bitcrushRate: 0.2
+                }
+            },
+            realityTear: {
+                name: "Reality Tear",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 3000,
+                    freqEnd: 80,
+                    attack: 0.002,
+                    decay: 0.4,
+                    sustain: 0.25,
+                    release: 0.5,
+                    duration: 0.7,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 3000,
+                    resonance: 6,
+                    noiseMix: 0.25,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 4,
+                    bitcrushRate: 0.12
+                }
+            },
+            digitalDecay: {
+                name: "Digital Decay",
+                params: {
+                    waveType: 'square',
+                    freqStart: 1200,
+                    freqEnd: 30,
+                    attack: 0.005,
+                    decay: 0.5,
+                    sustain: 0.15,
+                    release: 0.8,
+                    duration: 1.0,
+                    volume: 0.45,
+                    filterType: 'lowpass',
+                    cutoff: 2000,
+                    resonance: 4,
+                    noiseMix: 0.5,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 3,
+                    bitcrushRate: 0.08
+                }
+            },
+            voidStatic: {
+                name: "Void Static",
+                params: {
+                    waveType: 'sawtooth',
+                    freqStart: 500,
+                    freqEnd: 150,
+                    attack: 0.01,
+                    decay: 0.3,
+                    sustain: 0.4,
+                    release: 0.6,
+                    duration: 0.8,
+                    volume: 0.4,
+                    filterType: 'bandpass',
+                    cutoff: 800,
+                    resonance: 12,
+                    noiseMix: 0.6,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 4,
+                    bitcrushRate: 0.15
+                }
+            },
+            quantumShift: {
+                name: "Quantum Shift",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 2500,
+                    freqEnd: 100,
+                    attack: 0.001,
+                    decay: 0.25,
+                    sustain: 0.3,
+                    release: 0.4,
+                    duration: 0.5,
+                    volume: 0.5,
+                    filterType: 'highpass',
+                    cutoff: 300,
+                    resonance: 8,
+                    noiseMix: 0.2,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 5,
+                    bitcrushRate: 0.18
+                }
+            },
+            neuralCrash: {
+                name: "Neural Crash",
+                params: {
+                    waveType: 'square',
+                    freqStart: 1800,
+                    freqEnd: 60,
+                    attack: 0.002,
+                    decay: 0.35,
+                    sustain: 0.2,
+                    release: 0.7,
+                    duration: 0.9,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 2500,
+                    resonance: 5,
+                    noiseMix: 0.45,
+                    bitcrushEnabled: true,
+                    bitcrushBits: 3,
+                    bitcrushRate: 0.1
+                }
+            }
+        }
+    },
+
     obstacles: {
         name: "🎯 Obstacles",
         presets: {

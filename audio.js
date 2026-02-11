@@ -43,11 +43,27 @@ class AudioEngine {
             filterType = 'lowpass',
             cutoff = 2000,
             resonance = 1,
-            noiseMix = 0
+            noiseMix = 0,
+            bitcrushEnabled = false,
+            bitcrushBits = 8,
+            bitcrushRate = 1
         } = params;
 
         const now = ctx.currentTime;
         const totalDuration = attack + decay + duration + release;
+
+        // If bitcrusher is enabled, render offline and play buffer
+        if (bitcrushEnabled) {
+            this.renderOffline(params).then(buffer => {
+                const audioBuffer = ctx.createBuffer(1, buffer.length, 44100);
+                audioBuffer.getChannelData(0).set(buffer);
+                const source = ctx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(ctx.destination);
+                source.start();
+            });
+            return;
+        }
 
         // Master gain
         const masterGain = ctx.createGain();
@@ -147,7 +163,10 @@ class AudioEngine {
             filterType = 'lowpass',
             cutoff = 2000,
             resonance = 1,
-            noiseMix = 0
+            noiseMix = 0,
+            bitcrushEnabled = false,
+            bitcrushBits = 8,
+            bitcrushRate = 1
         } = params;
 
         const totalDuration = attack + decay + duration + release;
@@ -220,8 +239,35 @@ class AudioEngine {
 
         // Render
         const renderedBuffer = await offlineCtx.startRendering();
-        this.lastRenderedBuffer = renderedBuffer.getChannelData(0);
+        let finalBuffer = renderedBuffer.getChannelData(0);
+        
+        // Apply bitcrusher if enabled
+        if (bitcrushEnabled) {
+            finalBuffer = this.applyBitcrush(finalBuffer, bitcrushBits, bitcrushRate);
+        }
+        
+        this.lastRenderedBuffer = finalBuffer;
         return this.lastRenderedBuffer;
+    }
+    
+    /**
+     * Apply bitcrusher effect (sample rate reduction + bit depth reduction)
+     */
+    applyBitcrush(inputBuffer, bits, rateReduction) {
+        const buffer = new Float32Array(inputBuffer.length);
+        const levels = Math.pow(2, bits);
+        const step = Math.max(1, Math.floor(1 / rateReduction));
+        let held = 0;
+        
+        for (let i = 0; i < inputBuffer.length; i++) {
+            if (i % step === 0) {
+                // Quantize to bit depth
+                held = Math.round(inputBuffer[i] * levels) / levels;
+            }
+            buffer[i] = held;
+        }
+        
+        return buffer;
     }
 
     /**

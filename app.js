@@ -20,7 +20,10 @@ let currentParams = {
     filterType: 'lowpass',
     cutoff: 2000,
     resonance: 1,
-    noiseMix: 0
+    noiseMix: 0,
+    bitcrushEnabled: false,
+    bitcrushBits: 8,
+    bitcrushRate: 1
 };
 
 let currentPresetId = null;
@@ -42,6 +45,11 @@ const elements = {
     noiseMix: document.getElementById('noiseMix'),
     volume: document.getElementById('volume'),
     duration: document.getElementById('duration'),
+    bitcrushEnabled: document.getElementById('bitcrushEnabled'),
+    bitcrushBits: document.getElementById('bitcrushBits'),
+    bitcrushRate: document.getElementById('bitcrushRate'),
+    bitcrushBitsValue: document.getElementById('bitcrushBitsValue'),
+    bitcrushRateValue: document.getElementById('bitcrushRateValue'),
     
     freqStartValue: document.getElementById('freqStartValue'),
     freqEndValue: document.getElementById('freqEndValue'),
@@ -250,6 +258,13 @@ function setupEventListeners() {
     setupSlider('noiseMix', 'noiseMixValue', v => `${Math.round(v * 100)}%`);
     setupSlider('volume', 'volumeValue', v => `${Math.round(v * 100)}%`);
     setupSlider('duration', 'durationValue', v => `${v.toFixed(2)}s`);
+    setupSlider('bitcrushBits', 'bitcrushBitsValue', v => `${Math.round(v)} bit`);
+    setupSlider('bitcrushRate', 'bitcrushRateValue', v => `${Math.round(v * 100)}%`);
+
+    // Bitcrusher toggle
+    elements.bitcrushEnabled.addEventListener('change', (e) => {
+        currentParams.bitcrushEnabled = e.target.checked;
+    });
 
     // Buttons
     elements.playBtn.addEventListener('click', playSound);
@@ -362,6 +377,15 @@ function applyPreset(params) {
     elements.noiseMixValue.textContent = `${Math.round(params.noiseMix * 100)}%`;
     elements.volumeValue.textContent = `${Math.round(params.volume * 100)}%`;
     elements.durationValue.textContent = `${params.duration.toFixed(2)}s`;
+    
+    // Bitcrusher
+    elements.bitcrushEnabled.checked = params.bitcrushEnabled || false;
+    if (params.bitcrushBits !== undefined) {
+        elements.bitcrushBitsValue.textContent = `${Math.round(params.bitcrushBits)} bit`;
+    }
+    if (params.bitcrushRate !== undefined) {
+        elements.bitcrushRateValue.textContent = `${Math.round(params.bitcrushRate * 100)}%`;
+    }
 
     drawEnvelope();
 }
