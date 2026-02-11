@@ -486,30 +486,34 @@ class AudioEngine {
     }
 
     /**
-     * Generate a variant of params with subtle randomization
+     * Generate a variant of params with noticeable randomization
      */
-    generateVariant(params, intensity = 0.15) {
-        const vary = (value, range) => {
-            const variation = (Math.random() - 0.5) * 2 * range * intensity;
-            return value * (1 + variation);
+    generateVariant(params) {
+        // Random value between min and max multiplier
+        const vary = (value, minMult, maxMult) => {
+            const mult = minMult + Math.random() * (maxMult - minMult);
+            return value * mult;
         };
         
-        const varyInt = (value, range) => {
-            return Math.round(vary(value, range));
+        const varyInt = (value, minMult, maxMult) => {
+            return Math.round(vary(value, minMult, maxMult));
         };
 
+        // Pitch varies noticeably (±30%)
+        const pitchShift = 0.7 + Math.random() * 0.6; // 0.7 to 1.3
+        
         return {
             ...params,
-            freqStart: varyInt(params.freqStart, 0.2),
-            freqEnd: varyInt(params.freqEnd, 0.2),
-            attack: Math.max(0.001, vary(params.attack, 0.3)),
-            decay: Math.max(0.01, vary(params.decay, 0.25)),
-            sustain: Math.min(1, Math.max(0, vary(params.sustain, 0.2))),
-            release: Math.max(0.01, vary(params.release, 0.25)),
-            duration: Math.max(0.01, vary(params.duration, 0.2)),
-            cutoff: varyInt(params.cutoff, 0.15),
-            resonance: Math.max(0.1, vary(params.resonance, 0.2)),
-            volume: Math.min(1, Math.max(0.1, vary(params.volume, 0.1)))
+            freqStart: varyInt(params.freqStart, 0.7, 1.35),
+            freqEnd: varyInt(params.freqEnd, 0.65, 1.4),
+            attack: Math.max(0.001, vary(params.attack, 0.6, 1.5)),
+            decay: Math.max(0.01, vary(params.decay, 0.6, 1.5)),
+            sustain: Math.min(1, Math.max(0.05, vary(params.sustain, 0.7, 1.3))),
+            release: Math.max(0.01, vary(params.release, 0.6, 1.5)),
+            duration: Math.max(0.01, vary(params.duration, 0.7, 1.4)),
+            cutoff: varyInt(params.cutoff, 0.6, 1.5),
+            resonance: Math.max(0.1, vary(params.resonance, 0.7, 1.4)),
+            volume: Math.min(1, Math.max(0.2, vary(params.volume, 0.85, 1.0)))
         };
     }
 
