@@ -446,12 +446,22 @@ async function exportSound() {
     }
 }
 
+// Setup canvas for retina displays
+function setupCanvas(canvas, width, height) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    return { ctx, width, height };
+}
+
 // Draw envelope
 function drawEnvelope() {
     const canvas = elements.envelopeCanvas;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    const { ctx, width, height } = setupCanvas(canvas, 200, 80);
     const padding = 8;
 
     ctx.fillStyle = '#1a1a25';
@@ -505,9 +515,7 @@ function drawEnvelope() {
 // Draw waveform
 function drawWaveform() {
     const canvas = elements.waveformCanvas;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    const { ctx, width, height } = setupCanvas(canvas, 800, 120);
 
     ctx.fillStyle = '#1a1a25';
     ctx.fillRect(0, 0, width, height);
