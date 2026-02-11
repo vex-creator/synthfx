@@ -307,148 +307,148 @@ const PRESET_CATEGORIES = {
     impacts: {
         name: "💥 Impacts",
         presets: {
-            impactBasic: {
-                name: "Basic",
-                params: {
-                    waveType: 'sine',
-                    freqStart: 140,
-                    freqEnd: 35,
-                    attack: 0.003,
-                    decay: 0.1,
-                    sustain: 0.1,
-                    release: 0.12,
-                    duration: 0.08,
-                    volume: 0.65,
-                    filterType: 'lowpass',
-                    cutoff: 600,
-                    resonance: 1,
-                    noiseMix: 0.4
-                }
-            },
-            impactHeavy: {
-                name: "Heavy",
-                params: {
-                    waveType: 'sine',
-                    freqStart: 75,
-                    freqEnd: 22,
-                    attack: 0.003,
-                    decay: 0.18,
-                    sustain: 0.15,
-                    release: 0.22,
-                    duration: 0.12,
-                    volume: 0.7,
-                    filterType: 'lowpass',
-                    cutoff: 350,
-                    resonance: 1,
-                    noiseMix: 0.5
-                }
-            },
-            impactPunch: {
-                name: "Punch",
-                params: {
-                    waveType: 'sine',
-                    freqStart: 180,
-                    freqEnd: 55,
-                    attack: 0.003,
-                    decay: 0.05,
-                    sustain: 0.05,
-                    release: 0.06,
-                    duration: 0.04,
-                    volume: 0.6,
-                    filterType: 'lowpass',
-                    cutoff: 500,
-                    resonance: 1,
-                    noiseMix: 0.25
-                }
-            },
-            impactThud: {
-                name: "Thud",
-                params: {
-                    waveType: 'sine',
-                    freqStart: 90,
-                    freqEnd: 30,
-                    attack: 0.003,
-                    decay: 0.12,
-                    sustain: 0.08,
-                    release: 0.14,
-                    duration: 0.08,
-                    volume: 0.65,
-                    filterType: 'lowpass',
-                    cutoff: 280,
-                    resonance: 1,
-                    noiseMix: 0.18
-                }
-            },
-            impactCrash: {
-                name: "Crash",
-                params: {
-                    waveType: 'sawtooth',
-                    freqStart: 280,
-                    freqEnd: 45,
-                    attack: 0.003,
-                    decay: 0.22,
-                    sustain: 0.12,
-                    release: 0.35,
-                    duration: 0.18,
-                    volume: 0.55,
-                    filterType: 'lowpass',
-                    cutoff: 900,
-                    resonance: 1.5,
-                    noiseMix: 0.6
-                }
-            },
-            impactMetal: {
-                name: "Metal",
+            impactDigital: {
+                name: "Digital",
                 params: {
                     waveType: 'square',
                     freqStart: 800,
                     freqEnd: 200,
-                    attack: 0.002,
-                    decay: 0.05,
+                    attack: 0.001,
+                    decay: 0.04,
                     sustain: 0.1,
-                    release: 0.15,
-                    duration: 0.08,
+                    release: 0.08,
+                    duration: 0.04,
+                    volume: 0.5,
+                    filterType: 'bandpass',
+                    cutoff: 1500,
+                    resonance: 4,
+                    noiseMix: 0.15
+                }
+            },
+            impactGlitch: {
+                name: "Glitch",
+                params: {
+                    waveType: 'square',
+                    freqStart: 1200,
+                    freqEnd: 150,
+                    attack: 0.001,
+                    decay: 0.03,
+                    sustain: 0.05,
+                    release: 0.05,
+                    duration: 0.03,
                     volume: 0.45,
                     filterType: 'highpass',
-                    cutoff: 300,
-                    resonance: 2,
-                    noiseMix: 0.3
+                    cutoff: 400,
+                    resonance: 3,
+                    noiseMix: 0.25
                 }
             },
-            impactBoom: {
-                name: "Boom",
+            impactPing: {
+                name: "Ping",
                 params: {
                     waveType: 'sine',
-                    freqStart: 110,
-                    freqEnd: 38,
-                    attack: 0.003,
-                    decay: 0.16,
-                    sustain: 0.15,
-                    release: 0.25,
-                    duration: 0.18,
-                    volume: 0.6,
-                    filterType: 'lowpass',
-                    cutoff: 550,
-                    resonance: 1.2,
-                    noiseMix: 0.45
+                    freqStart: 1800,
+                    freqEnd: 400,
+                    attack: 0.001,
+                    decay: 0.06,
+                    sustain: 0.1,
+                    release: 0.1,
+                    duration: 0.05,
+                    volume: 0.4,
+                    filterType: 'bandpass',
+                    cutoff: 2000,
+                    resonance: 5,
+                    noiseMix: 0.05
                 }
             },
-            impactSmash: {
-                name: "Smash",
+            impactCrunch: {
+                name: "Crunch",
                 params: {
                     waveType: 'sawtooth',
-                    freqStart: 200,
-                    freqEnd: 40,
+                    freqStart: 600,
+                    freqEnd: 80,
+                    attack: 0.001,
+                    decay: 0.05,
+                    sustain: 0.08,
+                    release: 0.08,
+                    duration: 0.04,
+                    volume: 0.55,
+                    filterType: 'lowpass',
+                    cutoff: 2500,
+                    resonance: 3,
+                    noiseMix: 0.35
+                }
+            },
+            impactSnap: {
+                name: "Snap",
+                params: {
+                    waveType: 'square',
+                    freqStart: 2000,
+                    freqEnd: 300,
+                    attack: 0.001,
+                    decay: 0.02,
+                    sustain: 0.0,
+                    release: 0.03,
+                    duration: 0.01,
+                    volume: 0.5,
+                    filterType: 'highpass',
+                    cutoff: 500,
+                    resonance: 2,
+                    noiseMix: 0.2
+                }
+            },
+            impactWave: {
+                name: "Wave",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 400,
+                    freqEnd: 100,
                     attack: 0.002,
-                    decay: 0.15,
-                    sustain: 0.1,
-                    release: 0.2,
+                    decay: 0.08,
+                    sustain: 0.15,
+                    release: 0.15,
                     duration: 0.1,
+                    volume: 0.5,
+                    filterType: 'lowpass',
+                    cutoff: 1200,
+                    resonance: 4,
+                    noiseMix: 0.1
+                }
+            },
+            impactPulse: {
+                name: "Pulse",
+                params: {
+                    waveType: 'square',
+                    freqStart: 500,
+                    freqEnd: 150,
+                    attack: 0.002,
+                    decay: 0.06,
+                    sustain: 0.12,
+                    release: 0.1,
+                    duration: 0.06,
+                    volume: 0.5,
+                    filterType: 'bandpass',
+                    cutoff: 800,
+                    resonance: 3.5,
+                    noiseMix: 0.12
+                }
+            },
+            impactBass: {
+                name: "Bass Drop",
+                params: {
+                    waveType: 'sine',
+                    freqStart: 300,
+                    freqEnd: 50,
+                    attack: 0.002,
+                    decay: 0.1,
+                    sustain: 0.15,
+                    release: 0.12,
+                    duration: 0.08,
                     volume: 0.6,
                     filterType: 'lowpass',
-                    cutoff: 700,
-                    resonance: 1.5,
-                    noiseMix: 0.55
+                    cutoff: 800,
+                    resonance: 3,
+                    noiseMix: 0.08
                 }
             }
         }
